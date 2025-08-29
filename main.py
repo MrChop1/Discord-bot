@@ -15,13 +15,14 @@ intents.members = True
 intents.guilds = True
 intents.messages = True
 
-
+# Change the id's with your roles and stuff like that
 WELCOME_CHANNEL_ID = 1402696156433223912
 DIVISION1_ROLE_ID = 1410734604867993721
 DIVISION2_ROLE_ID = 1410734861144031262
 DIVISION3_ROLE_ID = 1410734981361172631
 DIVISION4_ROLE_ID =1410735078925144145
 
+# This is the default bot perfix but you can add whatever you want
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
@@ -53,13 +54,22 @@ async def welcome_event(ctx):
 
 @bot.command()
 async def add(ctx, member: discord.Member, *, role_name: str):
-    # Get the role from the server (case-insensitive match)
-    role = discord.utils.find(lambda r: r.name.lower() == role_name.lower(), ctx.guild.roles)
+    # Replace with your actual Permit role ID (as an integer)
+    PERMIT_ROLE_ID = 1410758236436693002  # <-- change this
 
+    # Check if the command author has the Permit role
+    permit_role = discord.utils.get(ctx.author.roles, id=PERMIT_ROLE_ID)
+    if permit_role is None:
+        await ctx.send("❌ You don't have permission to use this command.")
+        return
+
+    # Get the target role from the server (case-insensitive match)
+    role = discord.utils.find(lambda r: r.name.lower() == role_name.lower(), ctx.guild.roles)
     if role is None:
         await ctx.send(f"❌ The role `{role_name}` does not exist.")
         return
 
+    # Add or remove the role from the target member
     if role in member.roles:
         await member.remove_roles(role)
         await ctx.send(f"➖ Removed role `{role.name}` from {member.mention}.")
@@ -233,5 +243,6 @@ async def tryout(ctx):
 @bot.event
 async def on_ready():
     print(f'The bot is starting, {bot.user.name}')
+
 
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
